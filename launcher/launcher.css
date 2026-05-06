@@ -1,0 +1,212 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f1f5f9;
+  --bg-glow: #d1fae5;
+  --panel: #ffffff;
+  --border: #d6dee8;
+  --text: #1f2937;
+  --muted: #5a697c;
+  --accent: #0f766e;
+  --danger: #b91c1c;
+  --danger-border: #fecaca;
+  --danger-bg: #fff1f2;
+  --danger-soft-bg: #fff7f7;
+  --top-strip-bg: linear-gradient(180deg, #ecfeff 0%, #f8fafc 100%);
+  --viewer-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1220;
+    --bg-glow: #0f2f2f;
+    --panel: #111827;
+    --border: #334155;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #22d3ee;
+    --danger: #fca5a5;
+    --danger-border: #7f1d1d;
+    --danger-bg: #3f1018;
+    --danger-soft-bg: #2e1318;
+    --top-strip-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    --viewer-bg: #0b1220;
+  }
+}
+
+/* Fallback for Document PiP where @media prefers-color-scheme may not fire. */
+/* pip-trigger.js sets data-theme="dark" / "light" on <html> via matchMedia from the opener. */
+html[data-theme="dark"] {
+  --bg: #0b1220;
+  --bg-glow: #0f2f2f;
+  --panel: #111827;
+  --border: #334155;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #22d3ee;
+  --danger: #fca5a5;
+  --danger-border: #7f1d1d;
+  --danger-bg: #3f1018;
+  --danger-soft-bg: #2e1318;
+  --top-strip-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  --viewer-bg: #0b1220;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: var(--text);
+  background: radial-gradient(120% 140% at 20% -20%, var(--bg-glow) 0%, var(--bg) 45%), var(--bg);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+.top-strip {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--top-strip-bg);
+}
+
+.icon-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 1px 0;
+}
+
+.icon-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 7px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.icon-bar .icon-item:first-child {
+  margin-left: 2px;
+}
+
+.icon-item:hover {
+  border-color: var(--accent);
+}
+
+.icon-item.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent), #ffffff 35%);
+}
+
+.icon-image {
+  width: 16px;
+  height: 16px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#deleteCurrentButton {
+  border-color: var(--danger-border);
+  color: var(--danger);
+  background: var(--danger-soft-bg);
+}
+
+.icon-btn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.content-area {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: 0;
+  padding: 0;
+}
+
+.state-card {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  z-index: 6;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.state-card.error {
+  border-color: var(--danger-border);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.viewer {
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--viewer-bg);
+}
+
+#contentFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--viewer-bg);
+}
+
+.hidden {
+  display: none !important;
+}

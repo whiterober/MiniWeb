@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MiniWeb Launcher</title>
+    <link rel="icon" href="../icons/icon32.png" type="image/png" />
+    <link rel="stylesheet" href="launcher.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-strip">
+        <div id="iconBar" class="icon-bar" aria-label="固定链接图标栏"></div>
+        <div class="toolbar-actions">
+          <button
+            id="deleteCurrentButton"
+            class="btn icon-btn"
+            type="button"
+            aria-label="删除当前图标"
+            title="删除当前图标"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 3h6l1 2h4v2H4V5h4zm1 6h2v9h-2zm4 0h2v9h-2zM7 9h2v9H7z" />
+            </svg>
+          </button>
+          <button id="pinCurrentButton" class="btn icon-btn" type="button" aria-label="当前页加入 MiniWeb" title="当前页加入 MiniWeb">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2l2.5 5L20 8l-4 4 .9 6-4.9-2.6L7.1 18 8 12 4 8l5.5-1z" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <section id="emptyState" class="state-card hidden">
+          <h2>还没有固定链接</h2>
+          <p>点击右上角“当前页加入 MiniWeb”即可把当前页面加入图标栏。</p>
+        </section>
+
+        <section id="statusCard" class="state-card hidden"></section>
+
+        <section id="viewer" class="viewer">
+          <iframe
+            id="contentFrame"
+            title="页面内容区"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-storage-access-by-user-activation"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="clipboard-read; clipboard-write; fullscreen"
+          ></iframe>
+        </section>
+      </main>
+    </div>
+
+    <template id="iconItemTemplate">
+      <button class="icon-item" type="button">
+        <img class="icon-image" alt="" />
+      </button>
+    </template>
+
+    <script src="launcher.js" type="module"></script>
+  </body>
+</html>

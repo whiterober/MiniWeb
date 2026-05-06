@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniWeb</title>
+  <link rel="stylesheet" href="./action-popup.css" />
+</head>
+<body>
+  <main class="strip" aria-label="MiniWeb 原生横栏">
+    <section class="action-strip" aria-label="快捷操作">
+      <button id="switchPip" type="button" class="action-btn" title="切到 PiP">PiP</button>
+      <button id="pinCurrent" type="button" class="action-btn" title="加入当前页">Pin</button>
+      <button id="deleteCurrent" type="button" class="action-btn danger" title="删除当前页">Del</button>
+    </section>
+
+    <section class="icons-strip" aria-label="已固定链接">
+      <div id="icons" class="icons" role="list"></div>
+      <p id="empty" class="empty">无</p>
+    </section>
+
+    <p id="status" class="status" aria-live="polite"></p>
+  </main>
+
+  <script src="./action-popup.js"></script>
+</body>
+</html>

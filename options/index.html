@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitleText">MiniWeb 扩展选项</title>
+  <link rel="stylesheet" href="./options.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="head">
+      <h1 id="headTitle">MiniWeb 扩展选项</h1>
+      <p id="headDesc">MiniWeb 扩展的配置页。下方可管理站点修复规则，解决特定网页与图标栏的兼容问题。</p>
+    </header>
+
+    <section class="guide-panel" aria-labelledby="guideTitle">
+      <h2 id="guideTitle">扩展说明</h2>
+      <p id="guideIntro">MiniWeb 是一个右键菜单启动的常用网页启动器，你可以把常用页面固定为图标并在小窗中快速切换。</p>
+      <ul class="guide-list">
+        <li id="guideEntry">入口：在任意网页点右键，菜单中选"当前页加入 MiniWeb"，即可将当前页固定为图标。</li>
+        <li id="guidePin">固定链接：支持右键菜单直接固定当前页，也可在本页最下方"手动加入链接"处填写网址加入。</li>
+        <li id="guideOpen">点击图标：在小窗内切换到该链接。若站点限制内嵌加载，内容区会显示错误提示，此时可改用 Ctrl+点击或右键图标方式打开。</li>
+        <li id="guideCtrlClick">Ctrl（Mac 为 Cmd）+ 点击图标：直接在浏览器新标签页打开链接，可绕过内嵌限制。</li>
+        <li id="guideContextPip">右键图标栏中的图标：在置顶小窗中打开该链接（置顶小窗始终浮在所有窗口最上层）。</li>
+        <li id="guideDelete">删除链接：鼠标移到小窗左上角的 MiniWeb 图标上，会出现减号按钮；点击后长按即可删除当前选中的链接（长按设计为防止误操作）。</li>
+        <li id="guideShortcut">快捷键：默认 Ctrl+Shift+M，可快速打开或切换 MiniWeb；可在 Chrome 设置 → 扩展 → 快捷键 中自定义修改。</li>
+        <li id="guideTips">站点修复规则：下方规则区用于解决特定页面"顶部被图标栏遮挡"或动态内容样式失效等问题，普通用户无需修改。</li>
+      </ul>
+    </section>
+
+    <div id="rulesList" class="rules-list" aria-label="规则列表"></div>
+
+    <button id="addRule" type="button" class="add-rule-btn">＋ 添加站点规则</button>
+
+    <div class="bottom-bar">
+      <button id="resetDefaults" type="button">恢复默认</button>
+      <div class="bottom-right">
+        <p id="status" class="status" aria-live="polite"></p>
+        <button id="saveRules" type="button" class="primary">保存所有配置</button>
+      </div>
+    </div>
+
+    <details class="adv-panel">
+      <summary id="advSummary">高级：直接编辑 JSON</summary>
+      <textarea id="rulesJson" spellcheck="false" aria-label="站点修复规则 JSON"></textarea>
+      <div class="adv-actions">
+        <button id="syncFromJson" type="button">从 JSON 导入到上方卡片</button>
+      </div>
+    </details>
+
+    <section class="manual-add-panel">
+      <h2 id="manualTitle">手动加入链接</h2>
+      <p id="manualDesc">当目标网页屏蔽右键菜单时，可在这里直接把链接加入 MiniWeb。</p>
+      <div class="field-row">
+        <label id="manualAddUrlLabel" for="manualAddUrl">页面地址</label>
+        <input id="manualAddUrl" type="text" placeholder="https://example.com" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="field-row">
+        <label id="manualAddTitleLabel" for="manualAddTitle">显示名称</label>
+        <input id="manualAddTitle" type="text" placeholder="可选，不填则使用地址" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="manual-add-actions">
+        <p id="manualAddStatus" class="status" aria-live="polite"></p>
+        <button id="manualAddSubmit" type="button" class="primary">加入 MiniWeb</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="./options.js"></script>
+</body>
+</html>

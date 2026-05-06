@@ -1,0 +1,78 @@
+#miniweb-overlay-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2147483646;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+#miniweb-overlay-root .miniweb-bar {
+  height: 56px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+#miniweb-overlay-root .miniweb-brand {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #93c5fd;
+}
+
+#miniweb-overlay-root .miniweb-links {
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 2px;
+}
+
+#miniweb-overlay-root .miniweb-item {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.75);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+#miniweb-overlay-root .miniweb-item:hover {
+  border-color: #2dd4bf;
+}
+
+#miniweb-overlay-root .miniweb-item img {
+  width: 22px;
+  height: 22px;
+}
+
+#miniweb-overlay-root .miniweb-actions {
+  display: flex;
+  gap: 6px;
+}
+
+#miniweb-overlay-root .miniweb-btn {
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 8px;
+  height: 32px;
+  background: rgba(30, 41, 59, 0.85);
+  color: #e2e8f0;
+  padding: 0 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+html.miniweb-overlay-on body {
+  padding-top: 56px !important;
+}

@@ -1,0 +1,14 @@
+# Python venv
+.venv/
+
+# Editor settings
+.vscode/
+
+# OS and temp files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Notes and markdown docs (per user request)
+*.md
