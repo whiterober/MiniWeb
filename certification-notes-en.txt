@@ -1,0 +1,33 @@
+MiniWeb - Notes for Certification
+
+1) Test accounts and access
+- No sign-in is required.
+- No test account, paid subscription, invite code, or region lock is required.
+
+2) How to test core functionality
+- Install the extension and open any HTTP/HTTPS page.
+- Right-click the page and choose "Add current page to MiniWeb".
+- The page is added to MiniWeb pinned links and appears in the icon bar.
+- Click an icon to switch to that link inside the mini window.
+- Ctrl+click (Cmd+click on macOS) opens the link in a normal browser tab.
+- Right-click an icon opens that link in an always-on-top mini window.
+- Deletion uses anti-misclick protection: first enter delete-armed state, then press-and-hold to confirm deletion of the currently selected link.
+
+3) Expected behavior on restricted websites
+- Some websites block embedded loading via their own security policies; in those cases the extension shows an error hint.
+- Reviewers can still validate access by using Ctrl/Cmd+click to open in a normal tab.
+- If a website blocks the context menu, links can be added manually from the extension options page.
+
+4) Dependencies
+- No external account system or private backend service is required for core features.
+- No hidden feature flags are required for certification testing.
+
+5) Data handling and privacy boundary
+- Pinned links, site rules, and UI state are stored locally in browser storage.
+- The extension does not require user credentials.
+- No built-in ads SDK or telemetry upload is used for core operation.
+
+6) Submission context
+- Submission type: initial release.
+- Version: 1.0.0.
+- Debug-only permissions/listeners were removed before submission; permission scope was minimized for production use.
