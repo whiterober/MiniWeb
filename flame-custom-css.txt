@@ -1,0 +1,138 @@
+[class*="AppGrid_AppGrid__"],
+[class*="BookmarkGrid_BookmarkGrid__"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (min-width: 760px) {
+  [class*="AppGrid_AppGrid__"],
+  [class*="BookmarkGrid_BookmarkGrid__"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1120px) {
+  [class*="AppGrid_AppGrid__"],
+  [class*="BookmarkGrid_BookmarkGrid__"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+[class*="AppCard_AppCardDetails__"] {
+  min-width: 0;
+}
+
+[class*="AppCard_AppCardDetails__"] h5,
+[class*="AppCard_AppCardDetails__"] span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary: #1a6b8a !important;
+    --color-background: #edf1f5 !important;
+    --color-text: #152838 !important;
+  }
+
+  body {
+    background-color: #edf1f5 !important;
+    color: #152838 !important;
+  }
+
+  [class*="Header_Header__"] h1,
+  [class*="Header_Header__"] p,
+  [class*="Header_Header__"] span {
+    color: #152838 !important;
+  }
+
+  [class*="SectionHeadline_SectionHeadline__"] {
+    color: #1a6b8a !important;
+  }
+
+  [class*="AppCard_AppCardDetails__"] h5 {
+    color: #152838 !important;
+  }
+
+  [class*="AppCard_AppCardDetails__"] span {
+    color: #4a6478 !important;
+  }
+
+  [class*="BookmarkCard_BookmarkCard__"] h3 {
+    color: #1a6b8a !important;
+  }
+
+  [class*="BookmarkCard_Bookmarks__"] a {
+    color: #2e5569 !important;
+  }
+
+  /* 设置页文字可读性修复 */
+  h1, h2, h3, h4, h5, h6 {
+    color: #152838 !important;
+  }
+
+  p, label, li, td, th, span:not([class*="WeatherWidget"]) {
+    color: #152838 !important;
+  }
+
+  a {
+    color: #1a6b8a !important;
+  }
+
+  [class*="Settings_SettingsNavLink__"] {
+    color: #1a6b8a !important;
+  }
+
+  [class*="Button_Button__"] {
+    color: #edf1f5 !important;
+    background-color: #1a6b8a !important;
+  }
+
+  [class*="ActionButton_ActionButton__"] {
+    color: #152838 !important;
+  }
+
+  [class*="Icon_Icon__"] path {
+    fill: #1a6b8a !important;
+  }
+
+  [class*="BookmarkCard_BookmarkIconSvg__"] path {
+    fill: #1a6b8a !important;
+  }
+
+  [class*="AppCard_CustomIcon__"] path,
+  [class*="AppCard_CustomIcon__"] svg {
+    fill: #1a6b8a !important;
+  }
+
+  /* 弹窗表单容器背景与文字修复 */
+  [class*="ModalForm_ModalForm__"] {
+    background-color: #f0f4f7 !important;
+    color: #152838 !important;
+  }
+
+  [class*="InputGroup_InputGroup__"] {
+    color: #152838 !important;
+  }
+
+  /* 版本更新提示与通知可读性修复 */
+  [class*="NotificationCenter_NotificationCenter__"] {
+    color: #152838 !important;
+  }
+
+  [class*="Notification_Notification__"] {
+    background-color: #f0f4f7 !important;
+    border-color: #1a6b8a !important;
+    color: #1a6b8a !important;
+  }
+
+  [class*="Notification_Notification__"] * {
+    color: inherit !important;
+  }
+
+  [class*="Notification_Notification__"]:hover {
+    background-color: #1a6b8a !important;
+    color: #edf1f5 !important;
+  }
+}
+

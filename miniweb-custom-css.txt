@@ -1,0 +1,156 @@
+:root {
+  color-scheme: light dark;
+  --mw-bg-base: #eef6fb;
+  --mw-bg-grad-1: rgba(91, 173, 220, 0.26);
+  --mw-bg-grad-2: rgba(74, 191, 169, 0.20);
+  --mw-bg-grad-3: rgba(255, 255, 255, 0.82);
+  --mw-card-bg: rgba(255, 255, 255, 0.66);
+  --mw-card-border: rgba(69, 121, 158, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mw-bg-base: #0f1b28;
+    --mw-bg-grad-1: rgba(85, 170, 230, 0.24);
+    --mw-bg-grad-2: rgba(41, 149, 132, 0.20);
+    --mw-bg-grad-3: rgba(19, 29, 44, 0.88);
+    --mw-card-bg: rgba(24, 37, 54, 0.70);
+    --mw-card-border: rgba(130, 190, 228, 0.22);
+  }
+}
+
+html, body, #app {
+  background: var(--mw-bg-base) !important;
+}
+
+#app {
+  position: relative;
+  isolation: isolate;
+}
+
+#app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(1200px 700px at -10% -20%, var(--mw-bg-grad-1), transparent 65%),
+    radial-gradient(900px 600px at 110% 110%, var(--mw-bg-grad-2), transparent 70%),
+    linear-gradient(145deg, var(--mw-bg-grad-3) 0%, transparent 100%);
+}
+
+#app main, #app #sortable {
+  flex: none;
+  margin: 0;
+  padding: 10px 10px 120px 10px;
+  justify-content: left;
+}
+
+.appheader {
+  display: none !important;
+}
+
+.item {
+  width: 350px;
+  height: 65px;
+  padding: initial;
+  margin: 0 10px 10px 0;
+  background: var(--mw-card-bg);
+  border: 1px solid var(--mw-card-border);
+  backdrop-filter: blur(2px);
+}
+
+.item .link {
+  font-size: 0;
+}
+
+.item .title {
+  font-size: 14px;
+}
+
+.item .details {
+  width: 60%;
+}
+
+.item:after {
+  display: none;
+}
+
+#config-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+#config-buttons a {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  #config-buttons {
+    display: none !important;
+  }
+
+  #switchuser {
+    display: none !important;
+  }
+
+  .item-container {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .item {
+    width: 100%;
+    max-width: 100%;
+    margin-right: 0;
+  }
+}
+
+#switchuser .btn {
+  padding: 8px 12px 58px 12px;
+}
+
+.app-icon-container {
+  transform: scale(0.6);
+  margin-right: 0;
+}
+
+.livestats-container .livestats span {
+  font-size: 10px;
+}
+
+#switchuser {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  z-index: 0;
+  border-top: 0;
+  border-right: 0;
+}
+
+.tooltip {
+  display: block;
+  width: auto;
+  max-width: min(92vw, 360px);
+  margin: 0;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  white-space: normal;
+  line-height: 1.4;
+  font-size: 12px;
+}
