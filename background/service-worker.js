@@ -16,6 +16,7 @@ const NO_MAIN_FRAME_REWRITE_KEY = "noMainFrameRewriteHostsV1";
 const LAST_PIP_PLACEMENT_KEY = "lastPipPlacementV1";
 const SESSION_POPUP_WINDOW_IDS_KEY = "miniwebPopupWindowIds";
 const SYNC_PREF_KEY = "syncEnabledV1";
+const SYNC_DATA_KEYS = ["pinnedLinks", "siteFixRulesConfigV1", "noMainFrameRewriteHostsV1", "embedRuleHosts", "overlayEnabled"];
 const DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS = ["qq.xx.com"];
 const MODE_POPUP = "popup";
 const ENABLE_VERBOSE_LOGS = false;
@@ -39,6 +40,34 @@ function swWarn(...args) {
 
 function dataStorage() {
   return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
+}
+
+/**
+ * 首次运行迁移：樼测是否是第一次使用新版本（syncEnabledV1 在 local 里不存在），
+ * 若是则把 local 中的数据一次性推到 sync，然后写入标记防止重复运行。
+ */
+async function runFirstRunSyncMigration() {
+  try {
+    const pref = await chrome.storage.local.get(SYNC_PREF_KEY);
+    if (SYNC_PREF_KEY in pref) {
+      return; // 已迁移过，跳过
+    }
+    const localData = await chrome.storage.local.get(SYNC_DATA_KEYS);
+    const toSync = {};
+    for (const key of SYNC_DATA_KEYS) {
+      if (key in localData) {
+        toSync[key] = localData[key];
+      }
+    }
+    if (Object.keys(toSync).length > 0) {
+      await chrome.storage.sync.set(toSync);
+      swLog("[MiniWeb][SW] First-run migration: pushed", Object.keys(toSync), "to sync");
+    }
+    await chrome.storage.local.set({ [SYNC_PREF_KEY]: true });
+    _syncEnabled = true;
+  } catch (err) {
+    swWarn("[MiniWeb][SW] First-run migration failed:", err);
+  }
 }
 
 const DEFAULT_SITE_FIX_RULES = [
@@ -132,10 +161,12 @@ function t(key, substitutions, fallback = "") {
 }
 
 void refreshActionCaches();
+void runFirstRunSyncMigration();
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.contextMenus.removeAll();
   void refreshActionCaches();
+  void runFirstRunSyncMigration();
   void initDefaultSiteFixRules();
   void syncExecuteActionShortcutCache();
 });
@@ -143,6 +174,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(() => {
   void chrome.contextMenus.removeAll();
   void refreshActionCaches();
+  void runFirstRunSyncMigration();
   void initDefaultSiteFixRules();
   void syncExecuteActionShortcutCache();
 });
