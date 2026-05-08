@@ -28,6 +28,20 @@
       </ul>
     </section>
 
+    <section class="sync-panel" aria-labelledby="syncTitle">
+      <div class="sync-head">
+        <div class="sync-info">
+          <h2 id="syncTitle">配置同步</h2>
+          <p id="syncDesc">开启后，固定链接和规则将通过浏览器账号（Edge / Chrome）跨设备同步。</p>
+        </div>
+        <label class="toggle" for="syncToggle">
+          <input type="checkbox" id="syncToggle" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <p id="syncStatus" class="status" aria-live="polite"></p>
+    </section>
+
     <div id="rulesList" class="rules-list" aria-label="规则列表"></div>
 
     <button id="addRule" type="button" class="add-rule-btn">＋ 添加站点规则</button>

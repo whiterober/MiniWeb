@@ -38,6 +38,15 @@
       console.log(...args);
     }
   }
+
+  const SYNC_PREF_KEY = "syncEnabledV1";
+  let _syncEnabled = true;
+  void chrome.storage.local.get(SYNC_PREF_KEY).then((r) => {
+    if (SYNC_PREF_KEY in r) { _syncEnabled = r[SYNC_PREF_KEY] !== false; }
+  }).catch(() => {});
+  function dataStorage() {
+    return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
+  }
   const THEME_DARK = {
     panelBackground: "rgba(18,24,33,0.92)",
     panelBorder: "rgba(255,255,255,0.18)",
@@ -705,7 +714,7 @@
         return 1;
       }
 
-      const data = await chrome.storage.local.get(NO_MAIN_FRAME_REWRITE_KEY);
+      const data = await dataStorage().get(NO_MAIN_FRAME_REWRITE_KEY);
       const hosts = Array.isArray(data?.[NO_MAIN_FRAME_REWRITE_KEY])
         ? data[NO_MAIN_FRAME_REWRITE_KEY].map((h) => String(h || "").trim().toLowerCase()).filter(Boolean)
         : DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS;
@@ -934,8 +943,12 @@
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== "local") {
+    if (area !== "local" && area !== "sync") {
       return;
+    }
+
+    if (area === "local" && SYNC_PREF_KEY in changes) {
+      _syncEnabled = changes[SYNC_PREF_KEY].newValue !== false;
     }
 
     if (changes?.pinnedLinks) {
@@ -1468,7 +1481,7 @@
 
   async function hydrateSiteFixRulesFromStorage() {
     try {
-      const data = await chrome.storage.local.get(SITE_FIX_CONFIG_KEY);
+      const data = await dataStorage().get(SITE_FIX_CONFIG_KEY);
       applySiteFixRulesConfig(data?.[SITE_FIX_CONFIG_KEY]);
     } catch {
       applySiteFixRulesConfig(DEFAULT_SITE_FIX_RULES);

@@ -7,6 +7,15 @@
 
   let root = null;
 
+  const SYNC_PREF_KEY = "syncEnabledV1";
+  let _syncEnabled = true;
+  void chrome.storage.local.get(SYNC_PREF_KEY).then((r) => {
+    if (SYNC_PREF_KEY in r) { _syncEnabled = r[SYNC_PREF_KEY] !== false; }
+  }).catch(() => {});
+  function dataStorage() {
+    return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
+  }
+
   function t(key, substitutions, fallback = "") {
     try {
       const value = chrome.i18n?.getMessage(key, substitutions);
@@ -26,7 +35,7 @@
   async function init() {
     bindRuntimeEvents();
 
-    const state = await chrome.storage.local.get([ENABLED_KEY]);
+    const state = await dataStorage().get([ENABLED_KEY]);
     if (state[ENABLED_KEY]) {
       await mountOrRefresh();
     }
@@ -40,8 +49,12 @@
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== "local") {
+      if (area !== "local" && area !== "sync") {
         return;
+      }
+
+      if (area === "local" && SYNC_PREF_KEY in changes) {
+        _syncEnabled = changes[SYNC_PREF_KEY].newValue !== false;
       }
 
       if (changes[ENABLED_KEY]) {
@@ -60,12 +73,12 @@
   }
 
   async function enableOverlay() {
-    await chrome.storage.local.set({ [ENABLED_KEY]: true });
+    await dataStorage().set({ [ENABLED_KEY]: true });
     await mountOrRefresh();
   }
 
   async function mountOrRefresh() {
-    const state = await chrome.storage.local.get([ENABLED_KEY, STORAGE_KEY]);
+    const state = await dataStorage().get([ENABLED_KEY, STORAGE_KEY]);
     if (!state[ENABLED_KEY]) {
       return;
     }
@@ -135,7 +148,7 @@
     closeButton.type = "button";
     closeButton.textContent = t("overlayClose", undefined, "关闭");
     closeButton.addEventListener("click", () => {
-      void chrome.storage.local.set({ [ENABLED_KEY]: false });
+      void dataStorage().set({ [ENABLED_KEY]: false });
     });
 
     actions.appendChild(pinButton);
@@ -153,7 +166,7 @@
       return;
     }
 
-    const current = await chrome.storage.local.get([STORAGE_KEY]);
+    const current = await dataStorage().get([STORAGE_KEY]);
     const links = Array.isArray(current[STORAGE_KEY]) ? current[STORAGE_KEY] : [];
 
     const record = {
@@ -166,7 +179,7 @@
 
     const next = links.filter((item) => item && item.url !== record.url);
     next.unshift(record);
-    await chrome.storage.local.set({ [STORAGE_KEY]: next });
+    await dataStorage().set({ [STORAGE_KEY]: next });
   }
 
   function getFavicon(url) {

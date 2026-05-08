@@ -462,6 +462,40 @@ button.primary:hover { background: var(--primary-2); }
   border-radius: var(--radius);
 }
 
+/* ─── sync panel ─── */
+.sync-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.sync-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sync-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sync-info h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sync-info p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* ─── manual add panel ─── */
 .manual-add-panel {
   background: var(--panel);

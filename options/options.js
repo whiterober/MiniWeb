@@ -5,6 +5,8 @@
   const SITE_FIX_CONFIG_KEY = "siteFixRulesConfigV1";
   const AUTO_HIDE_SITES_KEY = "autoHideSitesV1";
   const NO_MAIN_FRAME_REWRITE_KEY = "noMainFrameRewriteHostsV1";
+  const SYNC_PREF_KEY = "syncEnabledV1";
+  const SYNC_DATA_KEYS = ["pinnedLinks", "siteFixRulesConfigV1", "noMainFrameRewriteHostsV1", "embedRuleHosts", "overlayEnabled"];
   const DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS = ["qq.xx.com"];
   const DEFAULT_AUTO_HIDE_SITE_PATTERNS = ["(^|\\.)gemini\\.google\\.com$"];
 
@@ -95,6 +97,8 @@
   const manualAddTitleEl = document.getElementById("manualAddTitle");
   const manualAddStatusEl = document.getElementById("manualAddStatus");
   const manualAddSubmitBtn = document.getElementById("manualAddSubmit");
+  const syncToggleEl   = document.getElementById("syncToggle");
+  const syncStatusEl   = document.getElementById("syncStatus");
 
   function t(key, substitutions, fallback = "") {
     try {
@@ -123,6 +127,15 @@
     document.getElementById("guideShortcut").textContent = t("optionsGuideShortcut", undefined, "快捷键：默认 Ctrl+Shift+M，可快速打开或切换 MiniWeb；可在 Chrome 设置 → 扩展 → 快捷键 中自定义修改。");
     document.getElementById("guideTips").textContent = t("optionsGuideTips", undefined, "站点修复规则：下方规则区用于解决特定页面“顶部被图标栏遮挡”或动态内容样式失效等问题，普通用户无需修改。");
     rulesListEl.setAttribute("aria-label", t("optionsRulesListAria", undefined, "规则列表"));
+    if (syncToggleEl) {
+      syncToggleEl.setAttribute("aria-label", t("optionsSyncToggleAria", undefined, "同步开关"));
+    }
+    if (document.getElementById("syncTitle")) {
+      document.getElementById("syncTitle").textContent = t("optionsSyncTitle", undefined, "配置同步");
+    }
+    if (document.getElementById("syncDesc")) {
+      document.getElementById("syncDesc").textContent = t("optionsSyncDesc", undefined, "开启后，固定链接和规则将通过浏览器账号（Edge / Chrome）跨设备同步。");
+    }
     addRuleBtn.textContent = t("optionsAddRuleBtn", undefined, "＋ 添加站点规则");
     resetBtn.textContent = t("optionsResetBtn", undefined, "恢复默认");
     saveBtn.textContent = t("optionsSaveBtn", undefined, "保存所有配置");
@@ -139,6 +152,13 @@
 
   // 内存状态（UI 实时反映，保存时才写入 storage）
   let workingRules = [];
+  let _syncEnabled = true;
+  void chrome.storage.local.get(SYNC_PREF_KEY).then((r) => {
+    if (SYNC_PREF_KEY in r) { _syncEnabled = r[SYNC_PREF_KEY] !== false; }
+  }).catch(() => {});
+  function dataStorage() {
+    return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
+  }
 
   // 工具函数
   function setStatus(text, type) {
@@ -185,6 +205,68 @@
     manualAddStatusEl.classList.remove("ok", "error");
     if (type) {
       manualAddStatusEl.classList.add(type);
+    }
+  }
+
+  function setSyncStatus(text, type) {
+    if (!syncStatusEl) { return; }
+    syncStatusEl.textContent = String(text || "");
+    syncStatusEl.classList.remove("ok", "error");
+    if (type) { syncStatusEl.classList.add(type); }
+  }
+
+  async function loadSyncPref() {
+    if (!syncToggleEl) { return; }
+    try {
+      const r = await chrome.storage.local.get(SYNC_PREF_KEY);
+      const enabled = r[SYNC_PREF_KEY] !== false; // undefined 默认 true
+      syncToggleEl.checked = enabled;
+      setSyncStatus(
+        enabled
+          ? t("optionsSyncEnabled", undefined, "同步已开启 — 数据将通过浏览器账号自动同步")
+          : t("optionsSyncDisabled", undefined, "同步已关闭 — 数据仅存于本机"),
+        enabled ? "ok" : ""
+      );
+    } catch {
+      if (syncToggleEl) { syncToggleEl.checked = true; }
+    }
+  }
+
+  async function migrateToArea(fromArea, toArea) {
+    const data = await fromArea.get(SYNC_DATA_KEYS);
+    const toSet = {};
+    for (const key of SYNC_DATA_KEYS) {
+      if (key in data) {
+        toSet[key] = data[key];
+      }
+    }
+    if (Object.keys(toSet).length > 0) {
+      await toArea.set(toSet);
+    }
+  }
+
+  async function handleSyncToggle(newEnabled) {
+    if (!syncToggleEl) { return; }
+    syncToggleEl.disabled = true;    _syncEnabled = newEnabled; // apply immediately so subsequent ops use correct area    setSyncStatus(t("optionsSyncMigrating", undefined, "正在迁移数据，请稍候..."));
+    try {
+      if (newEnabled) {
+        await migrateToArea(chrome.storage.local, chrome.storage.sync);
+      } else {
+        await migrateToArea(chrome.storage.sync, chrome.storage.local);
+      }
+      await chrome.storage.local.set({ [SYNC_PREF_KEY]: newEnabled });
+      setSyncStatus(
+        newEnabled
+          ? t("optionsSyncEnabled", undefined, "同步已开启 — 数据将通过浏览器账号自动同步")
+          : t("optionsSyncDisabled", undefined, "同步已关闭 — 数据仅存于本机"),
+        newEnabled ? "ok" : ""
+      );
+    } catch (err) {
+      _syncEnabled = !newEnabled; // revert on failure
+      syncToggleEl.checked = !newEnabled; // revert
+      setSyncStatus(t("optionsSyncFailed", [String(err?.message || err)], `迁移失败：${String(err?.message || err)}`), "error");
+    } finally {
+      syncToggleEl.disabled = false;
     }
   }
 
@@ -685,7 +767,7 @@
   async function loadRules() {
     setStatus(t("optionsLoading", undefined, "正在加载配置..."));
     try {
-      const result = await chrome.storage.local.get([SITE_FIX_CONFIG_KEY, AUTO_HIDE_SITES_KEY, NO_MAIN_FRAME_REWRITE_KEY]);
+      const result = await dataStorage().get([SITE_FIX_CONFIG_KEY, AUTO_HIDE_SITES_KEY, NO_MAIN_FRAME_REWRITE_KEY]);
       const raw = result?.[SITE_FIX_CONFIG_KEY];
       const legacyFloatingPatterns = result?.[AUTO_HIDE_SITES_KEY];
       const noRewriteHosts = Array.isArray(result?.[NO_MAIN_FRAME_REWRITE_KEY])
@@ -708,7 +790,7 @@
       rules = mergedNoRewrite.rules;
       changed = changed || mergedNoRewrite.changed;
       if (changed) {
-        await chrome.storage.local.set({ [SITE_FIX_CONFIG_KEY]: rules });
+        await dataStorage().set({ [SITE_FIX_CONFIG_KEY]: rules });
         if (Array.isArray(legacyFloatingPatterns) && legacyFloatingPatterns.length > 0) {
           await chrome.storage.local.remove(AUTO_HIDE_SITES_KEY);
         }
@@ -734,7 +816,7 @@
     try {
       const rules = collectAllCards();
       const noRewriteHosts = collectNoRewriteHostsFromRules(rules);
-      await chrome.storage.local.set({
+      await dataStorage().set({
         [SITE_FIX_CONFIG_KEY]: rules,
         [NO_MAIN_FRAME_REWRITE_KEY]: noRewriteHosts
       });
@@ -807,7 +889,14 @@
     }
   });
 
+  if (syncToggleEl) {
+    syncToggleEl.addEventListener("change", () => {
+      void handleSyncToggle(syncToggleEl.checked);
+    });
+  }
+
   // 启动
   applyStaticI18n();
   void loadRules();
+  void loadSyncPref();
 })();

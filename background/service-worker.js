@@ -15,9 +15,15 @@ const TOGGLE_SHORTCUT_COMMAND = "miniweb-toggle";
 const NO_MAIN_FRAME_REWRITE_KEY = "noMainFrameRewriteHostsV1";
 const LAST_PIP_PLACEMENT_KEY = "lastPipPlacementV1";
 const SESSION_POPUP_WINDOW_IDS_KEY = "miniwebPopupWindowIds";
+const SYNC_PREF_KEY = "syncEnabledV1";
 const DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS = ["qq.xx.com"];
 const MODE_POPUP = "popup";
 const ENABLE_VERBOSE_LOGS = false;
+
+let _syncEnabled = true;
+void chrome.storage.local.get(SYNC_PREF_KEY).then((r) => {
+  if (SYNC_PREF_KEY in r) { _syncEnabled = r[SYNC_PREF_KEY] !== false; }
+}).catch(() => {});
 
 function swLog(...args) {
   if (ENABLE_VERBOSE_LOGS) {
@@ -29,6 +35,10 @@ function swWarn(...args) {
   if (ENABLE_VERBOSE_LOGS) {
     console.warn(...args);
   }
+}
+
+function dataStorage() {
+  return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
 }
 
 const DEFAULT_SITE_FIX_RULES = [
@@ -243,8 +253,12 @@ chrome.commands.onCommand.addListener((command) => {
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== "local") {
+  if (area !== "local" && area !== "sync") {
     return;
+  }
+
+  if (area === "local" && SYNC_PREF_KEY in changes) {
+    _syncEnabled = changes[SYNC_PREF_KEY].newValue !== false;
   }
 
   if (changes[STORAGE_KEY]) {
@@ -273,7 +287,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message?.type === "miniweb-get-links") {
-    void chrome.storage.local.get(STORAGE_KEY)
+    void dataStorage().get(STORAGE_KEY)
       .then((result) => {
         const links = Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : [];
         sendResponse(links);
@@ -1398,7 +1412,7 @@ async function resolveActionClickTarget(tab) {
 }
 
 async function getActionDefaultTargetUrl() {
-  const current = await chrome.storage.local.get(STORAGE_KEY);
+  const current = await dataStorage().get(STORAGE_KEY);
   const links = Array.isArray(current[STORAGE_KEY]) ? current[STORAGE_KEY] : [];
   return getFirstPinableUrl(links) || ACTION_DEFAULT_TARGET_FALLBACK;
 }
@@ -1419,11 +1433,11 @@ async function refreshActionCaches() {
 
 async function initDefaultSiteFixRules() {
   try {
-    const existing = await chrome.storage.local.get([SITE_FIX_CONFIG_KEY, AUTO_HIDE_SITES_KEY, NO_MAIN_FRAME_REWRITE_KEY]);
+    const existing = await dataStorage().get([SITE_FIX_CONFIG_KEY, AUTO_HIDE_SITES_KEY, NO_MAIN_FRAME_REWRITE_KEY]);
 
     // Init noMainFrameRewriteHostsV1 with default only on first run
     if (!Array.isArray(existing[NO_MAIN_FRAME_REWRITE_KEY])) {
-      await chrome.storage.local.set({ [NO_MAIN_FRAME_REWRITE_KEY]: DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS });
+      await dataStorage().set({ [NO_MAIN_FRAME_REWRITE_KEY]: DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS });
     }
     const legacyPatterns = Array.isArray(existing?.[AUTO_HIDE_SITES_KEY])
       ? existing[AUTO_HIDE_SITES_KEY].map((item) => String(item || "").trim()).filter(Boolean)
@@ -1485,7 +1499,7 @@ async function initDefaultSiteFixRules() {
       }
     }
 
-    await chrome.storage.local.set({ [SITE_FIX_CONFIG_KEY]: list });
+    await dataStorage().set({ [SITE_FIX_CONFIG_KEY]: list });
     if (legacyPatterns.length > 0) {
       await chrome.storage.local.remove(AUTO_HIDE_SITES_KEY);
     }
@@ -1670,7 +1684,7 @@ async function ensureEmbeddingRules(url) {
     nextHosts.add(rootDomain);
   }
 
-  const current = await chrome.storage.local.get(EMBED_RULE_HOSTS_KEY);
+  const current = await dataStorage().get(EMBED_RULE_HOSTS_KEY);
   const hosts = Array.isArray(current[EMBED_RULE_HOSTS_KEY])
     ? current[EMBED_RULE_HOSTS_KEY].filter((item) => typeof item === "string" && item)
     : [];
@@ -1684,14 +1698,14 @@ async function ensureEmbeddingRules(url) {
   }
 
   if (changed) {
-    await chrome.storage.local.set({ [EMBED_RULE_HOSTS_KEY]: hosts });
+    await dataStorage().set({ [EMBED_RULE_HOSTS_KEY]: hosts });
   }
 
   await rebuildEmbeddingRules(hosts);
 }
 
 async function rebuildEmbeddingRules(hosts) {
-  const stored = await chrome.storage.local.get(NO_MAIN_FRAME_REWRITE_KEY);
+  const stored = await dataStorage().get(NO_MAIN_FRAME_REWRITE_KEY);
   const noMainFrameHosts = Array.isArray(stored[NO_MAIN_FRAME_REWRITE_KEY])
     ? stored[NO_MAIN_FRAME_REWRITE_KEY].filter((h) => typeof h === "string" && h)
     : DEFAULT_NO_MAIN_FRAME_REWRITE_HOSTS;
@@ -1805,7 +1819,7 @@ function delayMs(ms) {
 }
 
 async function enableOverlayMode(tab) {
-  await chrome.storage.local.set({ [OVERLAY_ENABLED_KEY]: true });
+  await dataStorage().set({ [OVERLAY_ENABLED_KEY]: true });
 
   if (!tab?.id) {
     return;
@@ -1847,13 +1861,13 @@ async function pinCurrentPage(tab) {
     createdAt
   };
 
-  const current = await chrome.storage.local.get(STORAGE_KEY);
+  const current = await dataStorage().get(STORAGE_KEY);
   const links = Array.isArray(current[STORAGE_KEY]) ? current[STORAGE_KEY] : [];
 
   const withoutSame = links.filter((item) => item && item.url !== record.url);
   withoutSame.push(record);
 
-  await chrome.storage.local.set({ [STORAGE_KEY]: withoutSame });
+  await dataStorage().set({ [STORAGE_KEY]: withoutSame });
   actionDefaultTargetCache = getFirstPinableUrl(withoutSame) || ACTION_DEFAULT_TARGET_FALLBACK;
   return { ok: true };
 }
@@ -1914,24 +1928,24 @@ async function showPageToast(tabId, message, isError) {
 }
 
 async function upsertPinnedLink(record) {
-  const current = await chrome.storage.local.get(STORAGE_KEY);
+  const current = await dataStorage().get(STORAGE_KEY);
   const links = Array.isArray(current[STORAGE_KEY]) ? current[STORAGE_KEY] : [];
   const withoutSame = links.filter((item) => item && item.url !== record.url);
   withoutSame.push(record);
-  await chrome.storage.local.set({ [STORAGE_KEY]: withoutSame });
+  await dataStorage().set({ [STORAGE_KEY]: withoutSame });
   return withoutSame;
 }
 
 async function deletePinnedLinkByUrl(url) {
-  const current = await chrome.storage.local.get(STORAGE_KEY);
+  const current = await dataStorage().get(STORAGE_KEY);
   const links = Array.isArray(current[STORAGE_KEY]) ? current[STORAGE_KEY] : [];
   const next = links.filter((item) => item && item.url !== url);
-  await chrome.storage.local.set({ [STORAGE_KEY]: next });
+  await dataStorage().set({ [STORAGE_KEY]: next });
   return next;
 }
 
 async function reorderPinnedLinksByUrls(orderedUrls) {
-  const current = await chrome.storage.local.get(STORAGE_KEY);
+  const current = await dataStorage().get(STORAGE_KEY);
   const links = Array.isArray(current[STORAGE_KEY]) ? current[STORAGE_KEY] : [];
   const linkByUrl = new Map();
 
@@ -1965,7 +1979,7 @@ async function reorderPinnedLinksByUrls(orderedUrls) {
     next.push(item);
   }
 
-  await chrome.storage.local.set({ [STORAGE_KEY]: next });
+  await dataStorage().set({ [STORAGE_KEY]: next });
   return next;
 }
 

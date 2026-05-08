@@ -145,5 +145,13 @@
   "popupOverlayHideBar": { "message": "隐藏图标栏" },
   "popupOverlaySwitchToBottom": { "message": "切换到底部" },
   "popupOverlaySwitchToTop": { "message": "切换到顶部" },
-  "popupOverlayShowBar": { "message": "显示图标栏" }
+  "popupOverlayShowBar": { "message": "显示图标栏" },
+
+  "optionsSyncTitle": { "message": "配置同步" },
+  "optionsSyncDesc": { "message": "开启后，固定链接和规则将通过浏览器账号（Edge / Chrome）跨设备同步。" },
+  "optionsSyncToggleAria": { "message": "同步开关" },
+  "optionsSyncEnabled": { "message": "同步已开启 — 数据将通过浏览器账号自动同步" },
+  "optionsSyncDisabled": { "message": "同步已关闭 — 数据仅存于本机" },
+  "optionsSyncMigrating": { "message": "正在迁移数据，请稍候..." },
+  "optionsSyncFailed": { "message": "迁移失败：$1" }
 }

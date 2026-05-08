@@ -14,6 +14,15 @@ const DEFAULT_TARGET_URL = "https://www.google.com/";
 const BRIDGE_TIMEOUT_MS = 1500;
 const ENABLE_VERBOSE_PIP_LOG = false;
 
+const SYNC_PREF_KEY = "syncEnabledV1";
+let _syncEnabled = true;
+void chrome.storage.local.get(SYNC_PREF_KEY).then((r) => {
+  if (SYNC_PREF_KEY in r) { _syncEnabled = r[SYNC_PREF_KEY] !== false; }
+}).catch(() => {});
+function dataStorage() {
+  return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
+}
+
 let links = [];
 let activeLinkId = "";
 let initialTargetUrl = DEFAULT_TARGET_URL;
@@ -169,7 +178,10 @@ function bindEvents() {
   // Listen to chrome.storage events
   if (typeof chrome !== "undefined" && chrome.storage) {
     chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== "local" || !changes[STORAGE_KEY]) {
+    if ((area !== "local" && area !== "sync") || !changes[STORAGE_KEY]) {
+      if (area === "local" && SYNC_PREF_KEY in changes) {
+        _syncEnabled = changes[SYNC_PREF_KEY].newValue !== false;
+      }
       return;
     }
 
@@ -245,10 +257,10 @@ async function loadLinks() {
   if (
     typeof chrome === "undefined" ||
     !chrome.storage ||
-    !chrome.storage.local ||
-    typeof chrome.storage.local.get !== "function"
+    !chrome.storage.sync ||
+    typeof chrome.storage.sync.get !== "function"
   ) {
-    logPip("loadLinks: chrome.storage.local unavailable");
+    logPip("loadLinks: chrome.storage.sync unavailable");
     if (links.length === 0) {
       const synced = await syncLinksFromBridge();
       if (synced.length > 0) {
@@ -259,7 +271,7 @@ async function loadLinks() {
     return;
   }
 
-  const result = await chrome.storage.local.get(STORAGE_KEY);
+  const result = await dataStorage().get(STORAGE_KEY);
   const raw = Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : [];
   links = normalizeLinks(raw);
   renderLinks();

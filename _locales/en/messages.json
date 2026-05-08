@@ -145,5 +145,13 @@
   "popupOverlayHideBar": { "message": "Hide icon bar" },
   "popupOverlaySwitchToBottom": { "message": "Move to bottom" },
   "popupOverlaySwitchToTop": { "message": "Move to top" },
-  "popupOverlayShowBar": { "message": "Show icon bar" }
+  "popupOverlayShowBar": { "message": "Show icon bar" },
+
+  "optionsSyncTitle": { "message": "Configuration Sync" },
+  "optionsSyncDesc": { "message": "When enabled, pinned links and rules sync across devices via your browser account (Edge / Chrome)." },
+  "optionsSyncToggleAria": { "message": "Sync toggle" },
+  "optionsSyncEnabled": { "message": "Sync is on — data syncs automatically via your browser account" },
+  "optionsSyncDisabled": { "message": "Sync is off — data is stored on this device only" },
+  "optionsSyncMigrating": { "message": "Migrating data, please wait..." },
+  "optionsSyncFailed": { "message": "Migration failed: $1" }
 }

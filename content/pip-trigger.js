@@ -17,6 +17,15 @@ pipDebug("[MiniWeb][CS] pip-trigger detail", `href=${window.location.href}`);
 
 let activePipWindow = null;
 
+const SYNC_PREF_KEY = "syncEnabledV1";
+let _syncEnabled = true;
+void chrome.storage.local.get(SYNC_PREF_KEY).then((r) => {
+  if (SYNC_PREF_KEY in r) { _syncEnabled = r[SYNC_PREF_KEY] !== false; }
+}).catch(() => {});
+function dataStorage() {
+  return _syncEnabled ? chrome.storage.sync : chrome.storage.local;
+}
+
 function getCurrentThemeName() {
   try {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -116,7 +125,7 @@ async function openPipLauncher(targetUrl, placement) {
   pipDebug("[MiniWeb][CS][PiP] loading pinned links from storage...");
   let pinnedLinks = [];
   try {
-    const result = await chrome.storage.local.get("pinnedLinks");
+    const result = await dataStorage().get("pinnedLinks");
     pinnedLinks = Array.isArray(result.pinnedLinks) ? result.pinnedLinks : [];
     pipDebug("[MiniWeb][CS][PiP] loaded", pinnedLinks.length, "pinned links");
   } catch (err) {
@@ -425,11 +434,11 @@ async function handlePinCurrentRequest({ pipWindow, pipDoc, requestId, url, titl
       createdAt: Date.now()
     };
 
-    const current = await chrome.storage.local.get("pinnedLinks");
+    const current = await dataStorage().get("pinnedLinks");
     const links = Array.isArray(current.pinnedLinks) ? current.pinnedLinks : [];
     const withoutSame = links.filter((item) => item && item.url !== record.url);
     withoutSame.unshift(record);
-    await chrome.storage.local.set({ pinnedLinks: withoutSame });
+    await dataStorage().set({ pinnedLinks: withoutSame });
 
     pipWindow.pinnedLinks = withoutSame;
 
@@ -461,7 +470,7 @@ async function handleSyncLinksRequest({ pipDoc, requestId }) {
   };
 
   try {
-    const current = await chrome.storage.local.get("pinnedLinks");
+    const current = await dataStorage().get("pinnedLinks");
     const links = Array.isArray(current.pinnedLinks) ? current.pinnedLinks : [];
     respond({ ok: true, links });
   } catch (error) {
@@ -598,7 +607,7 @@ async function handleDeleteLinkRequest({ pipWindow, pipDoc, requestId, linkId, u
   };
 
   try {
-    const current = await chrome.storage.local.get("pinnedLinks");
+    const current = await dataStorage().get("pinnedLinks");
     const links = Array.isArray(current.pinnedLinks) ? current.pinnedLinks : [];
     const next = links.filter((item) => {
       if (!item) {
@@ -613,7 +622,7 @@ async function handleDeleteLinkRequest({ pipWindow, pipDoc, requestId, linkId, u
       return true;
     });
 
-    await chrome.storage.local.set({ pinnedLinks: next });
+    await dataStorage().set({ pinnedLinks: next });
     pipWindow.pinnedLinks = next;
     respond({ ok: true, links: next });
   } catch (error) {
